@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block title %}Quiz Master - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <h1>Welcome to Quiz Master</h1>
+        <p class="lead">Test your knowledge with our interactive quizzes!</p>
+        <p>Quiz Master is a platform for students to take quizzes on various subjects and track their progress. Teachers can create and manage quizzes, view student performance, and more.</p>
+        
+        {% if not current_user.is_authenticated %}
+            <div class="mt-4">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary me-2">Sign In</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">Register</a>
+            </div>
+        {% else %}
+            <div class="mt-4">
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Go to Admin Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('user.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-lg-6">
+        <img src="https://i.pinimg.com/736x/bf/c0/d3/bfc0d3ca31106f703ae26703db4c3f01.jpg" alt="Quiz illustration" class="img-fluid rounded shadow">
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Practice Anywhere</h3>
+                <p class="card-text">Access quizzes anytime, anywhere on any device. Perfect for studying on the go.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Track Progress</h3>
+                <p class="card-text">Track your quiz scores and see your improvement over time with detailed analytics.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Multiple Subjects</h3>
+                <p class="card-text">Choose from a variety of subjects and topics to test and expand your knowledge.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

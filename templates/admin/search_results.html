@@ -1,0 +1,145 @@
+{% extends 'admin/layout.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mt-4">Search Results</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Search Results</li>
+    </ol>
+    
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-search"></i> Search
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('admin.search') }}" method="post">
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.search_query.label }}
+                            {{ form.search_query(class="form-control", value=query) }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form.search_type.label }}
+                            {{ form.search_type(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mt-4">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table"></i> Results
+        </div>
+        <div class="card-body">
+            {% if results %}
+                {% if search_type == 'user' %}
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Qualification</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in results %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.full_name }}</td>
+                                <td>{{ user.qualification }}</td>
+                                <td>
+                                    {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" class="btn btn-sm btn-info">View</a>
+                                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% elif search_type == 'subject' %}
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Chapters</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in results %}
+                            <tr>
+                                <td>{{ subject.name }}</td>
+                                <td>{{ subject.description }}</td>
+                                <td>{{ subject.chapters.count() }}</td>
+                                <td>
+                                    <a href="{{ url_for('admin.chapters', subject_id=subject.id) }}" class="btn btn-sm btn-info">Chapters</a>
+                                    <a href="{{ url_for('admin.edit_subject', subject_id=subject.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% elif search_type == 'quiz' %}
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Chapter</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in results %}
+                            <tr>
+                                <td>{{ quiz.title }}</td>
+                                <td>{{ quiz.chapter.name }}</td>
+                                <td>{{ quiz.chapter.subject.name }}</td>
+                                <td>
+                                    {% if quiz.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin.edit_quiz', quiz_id=quiz.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    No results found for your search query.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

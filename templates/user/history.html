@@ -1,0 +1,392 @@
+{% extends 'layout.html' %}
+
+{% block title %}Quiz History{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Your Quiz History</h1>
+    <p class="lead">Track your progress and see how you've performed over time.</p>
+    
+    {% if scores %}
+    <!-- Dashboard Charts -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Performance Over Time</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Subject Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="subjectDistributionChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Performance by Subject</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="subjectPerformanceChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Score Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="scoreDistributionChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quiz History Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Quiz Attempt History</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Quiz</th>
+                            <th>Subject</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for score in scores %}
+                            <tr>
+                                <td>{{ score.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ score.quiz.title }}</td>
+                                <td>
+                                    <span class="badge rounded-pill bg-secondary">
+                                        {{ score.quiz.chapter.subject.name }}
+                                    </span>
+                                </td>
+                                <td>{{ score.total_scored }}/{{ score.total_questions }}</td>
+                                <td>
+                                    <div class="progress" style="width: 100px; height: 20px;">
+                                        <div class="progress-bar 
+                                            {% if score.get_percentage() >= 80 %}bg-success
+                                            {% elif score.get_percentage() >= 60 %}bg-info
+                                            {% elif score.get_percentage() >= 40 %}bg-warning
+                                            {% else %}bg-danger{% endif %}" 
+                                            role="progressbar" 
+                                            style="width: {{ score.get_percentage() }}%" 
+                                            aria-valuenow="{{ score.get_percentage() }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
+                                            {{ (score.get_percentage() | round(1)) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('user.quiz_result', score_id=score.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i> View Details
+                                    </a>
+                                    <a href="{{ url_for('user.take_quiz', quiz_id=score.quiz.id) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-redo"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-clipboard-list fa-5x text-muted"></i>
+            </div>
+            <h4 class="text-muted">You haven't taken any quizzes yet</h4>
+            <p class="text-muted">Start exploring subjects and complete quizzes to track your progress.</p>
+            <a href="{{ url_for('user.subjects') }}" class="btn btn-primary mt-2">
+                <i class="fas fa-book me-1"></i> Browse Subjects
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Inline JavaScript for Charts -->
+{% if scores %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prepare data from the scores
+    const scoresData = [
+        {% for score in scores %}
+        {
+            date: '{{ score.timestamp.strftime('%Y-%m-%d') }}',
+            time: '{{ score.timestamp.strftime('%H:%M') }}',
+            percentage: {{ score.get_percentage() }},
+            subject: '{{ score.quiz.chapter.subject.name }}',
+            quiz: '{{ score.quiz.title }}',
+            scored: {{ score.total_scored }},
+            total: {{ score.total_questions }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    // Sort data by date (ascending)
+    scoresData.sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+    
+    // 1. Performance Over Time Chart (Line Chart)
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: scoresData.map(score => score.date),
+            datasets: [{
+                label: 'Score Percentage',
+                data: scoresData.map(score => score.percentage),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const idx = tooltipItems[0].dataIndex;
+                            return `${scoresData[idx].date} (${scoresData[idx].quiz})`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Percentage (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Quiz Date'
+                    }
+                }
+            }
+        }
+    });
+    
+    // 2. Subject Distribution Chart (Pie Chart)
+    // Group quizzes by subject and count
+    const subjectCounts = {};
+    scoresData.forEach(score => {
+        if (!subjectCounts[score.subject]) {
+            subjectCounts[score.subject] = 0;
+        }
+        subjectCounts[score.subject]++;
+    });
+    
+    const subjectLabels = Object.keys(subjectCounts);
+    const subjectData = Object.values(subjectCounts);
+    
+    const distributionCtx = document.getElementById('subjectDistributionChart').getContext('2d');
+    new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: subjectLabels,
+            datasets: [{
+                data: subjectData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(199, 199, 199, 0.7)',
+                    'rgba(83, 102, 255, 0.7)',
+                    'rgba(40, 159, 64, 0.7)',
+                    'rgba(210, 199, 199, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            const total = subjectData.reduce((sum, value) => sum + value, 0);
+                            const percentage = Math.round((subjectData[tooltipItem.dataIndex] / total) * 100);
+                            return `${tooltipItem.label}: ${subjectData[tooltipItem.dataIndex]} quizzes (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // 3. Performance by Subject Chart (Bar Chart)
+    // Calculate average score by subject
+    const subjectScores = {};
+    const subjectAttempts = {};
+    
+    scoresData.forEach(score => {
+        if (!subjectScores[score.subject]) {
+            subjectScores[score.subject] = 0;
+            subjectAttempts[score.subject] = 0;
+        }
+        subjectScores[score.subject] += score.percentage;
+        subjectAttempts[score.subject]++;
+    });
+    
+    const subjectPerformanceLabels = Object.keys(subjectScores);
+    const subjectPerformanceData = subjectPerformanceLabels.map(subject => 
+        (subjectScores[subject] / subjectAttempts[subject]).toFixed(1)
+    );
+    
+    const subjectPerformanceCtx = document.getElementById('subjectPerformanceChart').getContext('2d');
+    new Chart(subjectPerformanceCtx, {
+        type: 'bar',
+        data: {
+            labels: subjectPerformanceLabels,
+            datasets: [{
+                label: 'Average Score',
+                data: subjectPerformanceData,
+                backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return `Average: ${tooltipItem.raw}% (${subjectAttempts[tooltipItem.label]} attempts)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Average Score (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Subject'
+                    }
+                }
+            }
+        }
+    });
+    
+    // 4. Score Distribution Chart (Histogram-like bar chart)
+    const scoreRanges = [
+        '0-20%', '21-40%', '41-60%', '61-80%', '81-100%'
+    ];
+    const scoreDistribution = [0, 0, 0, 0, 0];
+    
+    scoresData.forEach(score => {
+        if (score.percentage <= 20) scoreDistribution[0]++;
+        else if (score.percentage <= 40) scoreDistribution[1]++;
+        else if (score.percentage <= 60) scoreDistribution[2]++;
+        else if (score.percentage <= 80) scoreDistribution[3]++;
+        else scoreDistribution[4]++;
+    });
+    
+    const distributionColors = [
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(255, 159, 64, 0.7)',
+        'rgba(255, 205, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(54, 162, 235, 0.7)'
+    ];
+    
+    const scoreDistributionCtx = document.getElementById('scoreDistributionChart').getContext('2d');
+    new Chart(scoreDistributionCtx, {
+        type: 'bar',
+        data: {
+            labels: scoreRanges,
+            datasets: [{
+                label: 'Number of Quizzes',
+                data: scoreDistribution,
+                backgroundColor: distributionColors,
+                borderColor: distributionColors.map(color => color.replace('0.7', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Quizzes'
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Score Range'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

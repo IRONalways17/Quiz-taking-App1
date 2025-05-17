@@ -1,0 +1,149 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}User Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.users') }}">Users</a></li>
+            <li class="breadcrumb-item active">{{ user.full_name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>User Details: {{ user.full_name }}</h1>
+                <div>
+                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit User
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>User Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 text-center">
+                        <div class="rounded-circle bg-light d-inline-flex justify-content-center align-items-center mb-3" style="width: 100px; height: 100px;">
+                            <i class="bi bi-person-fill" style="font-size: 3rem;"></i>
+                        </div>
+                        <h3 class="mb-0">{{ user.full_name }}</h3>
+                        <p class="text-muted">{{ user.username }}</p>
+                    </div>
+                    
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Account type:</span>
+                            <strong>{% if user.is_admin %}Administrator{% else %}Student{% endif %}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Status:</span>
+                            <strong>{% if user.is_active %}Active{% else %}Inactive{% endif %}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Qualification:</span>
+                            <strong>{{ user.qualification or 'N/A' }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Date of Birth:</span>
+                            <strong>{{ user.dob.strftime('%Y-%m-%d') if user.dob else 'N/A' }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Registered:</span>
+                            <strong>{{ user.created_at.strftime('%Y-%m-%d') }}</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5>Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Edit User
+                        </a>
+                        {% if not (user.is_admin and user.id == current_user.id) %}
+                            <form action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" method="post">
+                                <button type="submit" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %} w-100">
+                                    {% if user.is_active %}
+                                        <i class="bi bi-person-x"></i> Deactivate Account
+                                    {% else %}
+                                        <i class="bi bi-person-check"></i> Activate Account
+                                    {% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quiz History</h5>
+                </div>
+                <div class="card-body">
+                    {% if scores %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Quiz</th>
+                                        <th>Subject</th>
+                                        <th>Score</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for score in scores %}
+                                        <tr>
+                                            <td>{{ score.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ score.quiz.title }}</td>
+                                            <td>{{ score.quiz.chapter.subject.name }}</td>
+                                            <td>{{ score.total_scored }}/{{ score.total_questions }}</td>
+                                            <td>
+                                                <div class="progress">
+                                                    <div class="progress-bar 
+                                                        {% if score.get_percentage() >= 80 %}bg-success
+                                                        {% elif score.get_percentage() >= 60 %}bg-info
+                                                        {% elif score.get_percentage() >= 40 %}bg-warning
+                                                        {% else %}bg-danger{% endif %}" 
+                                                        role="progressbar" 
+                                                        style="width: {{ score.get_percentage() }}%" 
+                                                        aria-valuenow="{{ score.get_percentage() }}" 
+                                                        aria-valuemin="0" 
+                                                        aria-valuemax="100">
+                                                        {{ "%.1f"|format(score.get_percentage()) }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>This user hasn't taken any quizzes yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Create New Quiz{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.quizzes') }}">Quizzes</a></li>
+                    <li class="breadcrumb-item active">Create Quiz</li>
+                </ol>
+            </nav>
+            <h1>Create New Quiz</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows=5) }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.chapter_id.label(class="form-label") }}
+                                    {{ form.chapter_id(class="form-select") }}
+                                    {% if form.chapter_id.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.chapter_id.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.time_limit.label(class="form-label") }}
+                                    {{ form.time_limit(class="form-control", min=1, max=180) }}
+                                    {% if form.time_limit.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.time_limit.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 form-check">
+                            {{ form.is_active(class="form-check-input") }}
+                            {{ form.is_active.label(class="form-check-label") }}
+                            {% if form.is_active.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.is_active.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.quizzes') }}" class="btn btn-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Tips for Creating Quizzes</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>Use clear, concise titles that describe what the quiz is testing</li>
+                        <li>Provide detailed instructions in the description</li>
+                        <li>Select an appropriate time limit based on the number and complexity of questions</li>
+                        <li>After creating the quiz, you'll be able to add questions</li>
+                        <li>If you set the quiz as inactive, students won't be able to see it until you activate it</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <p>After creating your quiz, you'll need to:</p>
+                    <ol>
+                        <li>Add questions to the quiz</li>
+                        <li>Set correct answers for each question</li>
+                        <li>Assign marks/points to each question</li>
+                        <li>Make sure the quiz is set to "Active" when you're ready for students to take it</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

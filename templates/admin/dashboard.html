@@ -1,0 +1,179 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Admin Dashboard</h1>
+            <p class="text-muted">Welcome to the Quiz Master admin panel.</p>
+        </div>
+    </div>
+
+    <!-- Search Feature -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Search</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('admin.search') }}" method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <select name="search_type" class="form-select" required>
+                                <option value="" selected disabled>Select what to search...</option>
+                                <option value="users">Users</option>
+                                <option value="subjects">Subjects</option>
+                                <option value="chapters">Chapters</option>
+                                <option value="quizzes">Quizzes</option>
+                                <option value="attempts">Quiz Attempts</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="query" class="form-control" placeholder="Enter search keywords..." required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-1"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Stats Cards -->
+        <div class="col-md-3">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <h5>Total Users</h5>
+                    <h2>{{ user_count }}</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="text-white stretched-link" href="{{ url_for('admin.users') }}">View Details</a>
+                    <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <h5>Subjects</h5>
+                    <h2>{{ subject_count }}</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="text-white stretched-link" href="{{ url_for('admin.subjects') }}">View Details</a>
+                    <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <h5>Quizzes</h5>
+                    <h2>{{ quiz_count }}</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="text-white stretched-link" href="{{ url_for('admin.quizzes') }}">View Details</a>
+                    <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <h5>Quiz Attempts</h5>
+                    <h2>{{ attempt_count }}</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="text-white stretched-link" href="{{ url_for('admin.reports') }}">View Details</a>
+                    <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between">
+                    <h5>Recent Quiz Activity</h5>
+                    <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Quiz</th>
+                                    <th>Score</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_activities %}
+                                    {% for activity in recent_activities %}
+                                    <tr>
+                                        <td>{{ activity.user.full_name }}</td>
+                                        <td>{{ activity.quiz.title }}</td>
+                                        <td>{{ activity.total_scored }}/{{ activity.total_questions }}</td>
+                                        <td>{{ activity.timestamp.strftime('%Y-%m-%d') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No recent quiz activities.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('admin.add_subject') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Add New Subject</h5>
+                            </div>
+                            <p class="mb-1">Create a new subject for organizing quizzes.</p>
+                        </a>
+                        <a href="{{ url_for('admin.add_chapter') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Add New Chapter</h5>
+                            </div>
+                            <p class="mb-1">Add a chapter to an existing subject.</p>
+                        </a>
+                        <a href="{{ url_for('admin.create_quiz') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Create New Quiz</h5>
+                            </div>
+                            <p class="mb-1">Create a new quiz with questions and answers.</p>
+                        </a>
+                        <a href="{{ url_for('admin.users') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Manage Users</h5>
+                            </div>
+                            <p class="mb-1">View and manage user accounts.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

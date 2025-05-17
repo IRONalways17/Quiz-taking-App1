@@ -1,0 +1,158 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Add Question{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.quizzes') }}">Quizzes</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.edit_quiz', quiz_id=quiz.id) }}">{{ quiz.title }}</a></li>
+                    <li class="breadcrumb-item active">Add Question</li>
+                </ol>
+            </nav>
+            <h1>Add Question to: {{ quiz.title }}</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.question_text.label(class="form-label") }}
+                            {{ form.question_text(class="form-control", rows=3) }}
+                            {% if form.question_text.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.question_text.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Options</label>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">1</span>
+                                {{ form.option1(class="form-control") }}
+                            </div>
+                            {% if form.option1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.option1.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">2</span>
+                                {{ form.option2(class="form-control") }}
+                            </div>
+                            {% if form.option2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.option2.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">3</span>
+                                {{ form.option3(class="form-control") }}
+                            </div>
+                            {% if form.option3.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.option3.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">4</span>
+                                {{ form.option4(class="form-control") }}
+                            </div>
+                            {% if form.option4.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.option4.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.correct_answer.label(class="form-label") }}
+                                {{ form.correct_answer(class="form-select") }}
+                                {% if form.correct_answer.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.correct_answer.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.mark.label(class="form-label") }}
+                                {{ form.mark(class="form-control", min=0.5, max=10, step=0.5) }}
+                                {% if form.mark.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.mark.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.edit_quiz', quiz_id=quiz.id) }}" class="btn btn-secondary">Back to Quiz</a>
+                            <div>
+                                <button type="submit" name="add_another" class="btn btn-outline-primary me-2">Save and Add Another</button>
+                                {{ form.submit(class="btn btn-primary", value="Save Question") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Question Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>Write clear, unambiguous questions</li>
+                        <li>Make all options plausible</li>
+                        <li>Avoid "All of the above" or "None of the above" options</li>
+                        <li>Ensure there is only one correct answer</li>
+                        <li>Assign marks based on question difficulty</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Quiz Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Title:</strong> {{ quiz.title }}</p>
+                    <p><strong>Subject:</strong> {{ quiz.chapter.subject.name }}</p>
+                    <p><strong>Chapter:</strong> {{ quiz.chapter.name }}</p>
+                    <p><strong>Time Limit:</strong> {{ quiz.time_limit }} minutes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

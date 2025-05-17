@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+
+{% block title %}Available Subjects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Available Subjects</h1>
+    <p class="lead">Browse all subjects and take quizzes in your areas of interest.</p>
+    
+    <div class="row mt-4">
+        {% if subjects %}
+            {% for subject in subjects %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="card-title">{{ subject.name }}</h3>
+                            <p class="card-text">{{ subject.description }}</p>
+                            <p class="text-muted">{{ subject.chapters.count() }} chapters</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('user.subject_detail', subject_id=subject.id) }}" class="btn btn-primary">Explore Subject</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <p>No subjects available at this time. Please check back later.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

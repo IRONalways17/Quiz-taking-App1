@@ -1,0 +1,116 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>User Management</h1>
+            <p class="text-muted">View and manage all registered users.</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Qualification</th>
+                                <th>Admin Status</th>
+                                <th>Status</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.full_name }}</td>
+                                    <td>{{ user.qualification or 'N/A' }}</td>
+                                    <td>
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-primary">Admin</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">User</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </a>
+                                            {% if not (user.is_admin and user.id == current_user.id) %}
+                                                <button type="button" class="btn btn-sm {% if user.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" data-bs-toggle="modal" data-bs-target="#toggleStatusModal{{ user.id }}">
+                                                    {% if user.is_active %}
+                                                        <i class="bi bi-person-x"></i> Deactivate
+                                                    {% else %}
+                                                        <i class="bi bi-person-check"></i> Activate
+                                                    {% endif %}
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Toggle Status Modal -->
+                                        {% if not (user.is_admin and user.id == current_user.id) %}
+                                            <div class="modal fade" id="toggleStatusModal{{ user.id }}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Confirm Action</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            {% if user.is_active %}
+                                                                <p>Are you sure you want to deactivate the user "{{ user.full_name }}" ({{ user.username }})?</p>
+                                                                <p class="text-danger">The user will not be able to log in after this action.</p>
+                                                            {% else %}
+                                                                <p>Are you sure you want to activate the user "{{ user.full_name }}" ({{ user.username }})?</p>
+                                                                <p class="text-success">The user will be able to log in after this action.</p>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <form action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" method="post">
+                                                                <button type="submit" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                                                    {% if user.is_active %}Deactivate{% else %}Activate{% endif %} User
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p>No users found in the database.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

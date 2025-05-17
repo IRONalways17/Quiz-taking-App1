@@ -1,0 +1,92 @@
+{% extends 'layout.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>User Profile</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('auth.profile') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control", readonly=True) }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.full_name.label(class="form-label") }}
+                        {{ form.full_name(class="form-control") }}
+                        {% if form.full_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.full_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.qualification.label(class="form-label") }}
+                        {{ form.qualification(class="form-control") }}
+                        {% if form.qualification.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.qualification.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.dob.label(class="form-label") }}
+                        {{ form.dob(class="form-control", type="date") }}
+                        {% if form.dob.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.dob.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    <h5>Change Password (optional)</h5>
+                    
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control") }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                     {{ form.confirm_password.label(class="form-label") }}
+                     {{ form.confirm_password(class="form-control") }}
+                     {% if form.confirm_password.errors %}
+                         <div class="invalid-feedback d-block">
+                             {% for error in form.confirm_password.errors %}
+                                 {{ error }}
+                             {% endfor %}
+                         </div>
+                     {% endif %}
+                 </div>
+                 
+                 <div class="d-grid">
+                     {{ form.submit(class="btn btn-primary", value="Update Profile") }}
+                 </div>
+             </form>
+         </div>
+     </div>
+ </div>
+</div>
+{% endblock %}

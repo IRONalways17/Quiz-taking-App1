@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ subject.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('user.subjects') }}">Subjects</a></li>
+            <li class="breadcrumb-item active">{{ subject.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ subject.name }}</h1>
+            <p class="lead">{{ subject.description }}</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% if chapters %}
+            {% for chapter in chapters %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="card-title">{{ chapter.name }}</h3>
+                            <p class="card-text">{{ chapter.description }}</p>
+                            <p class="text-muted">{{ chapter.quizzes.count() }} quizzes available</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('user.chapter_quizzes', chapter_id=chapter.id) }}" class="btn btn-primary">View Quizzes</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <p>No chapters available for this subject yet. Please check back later.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

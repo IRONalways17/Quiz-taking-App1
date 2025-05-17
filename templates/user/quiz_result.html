@@ -1,0 +1,93 @@
+{% extends 'layout.html' %}
+
+{% block title %}Quiz Result{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('user.history') }}">Quiz History</a></li>
+            <li class="breadcrumb-item active">Quiz Result</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h1>Quiz Result: {{ quiz.title }}</h1>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h3>Your Score</h3>
+                            <div class="display-1 fw-bold my-3">{{ score.total_scored }}/{{ score.total_questions }}</div>
+                            <h4>{{ (score.get_percentage() | round(1)) }}%</h4>
+                            <div class="progress mt-2" style="height: 20px;">
+                                <div class="progress-bar 
+                                    {% if score.get_percentage() >= 80 %}bg-success
+                                    {% elif score.get_percentage() >= 60 %}bg-info
+                                    {% elif score.get_percentage() >= 40 %}bg-warning
+                                    {% else %}bg-danger{% endif %}"
+                                    role="progressbar" style="width: {{ score.get_percentage() }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Quiz Details</h4>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Date/Time:</span>
+                                    <strong>{{ score.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Subject:</span>
+                                    <strong>{{ quiz.chapter.subject.name }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Chapter:</span>
+                                    <strong>{{ quiz.chapter.name }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Total Questions:</span>
+                                    <strong>{{ score.total_questions }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Correct Answers:</span>
+                                    <strong>{{ score.total_scored }}</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mb-4">
+                <h3>Feedback</h3>
+                {% if score.get_percentage() >= 80 %}
+                    <span class="badge bg-success fs-6">Excellent</span>
+                {% elif score.get_percentage() >= 60 %}
+                    <span class="badge bg-info fs-6">Good</span>
+                {% elif score.get_percentage() >= 40 %}
+                    <span class="badge bg-warning text-dark fs-6">Satisfactory</span>
+                {% else %}
+                    <span class="badge bg-danger fs-6">Needs Improvement</span>
+                {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('user.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-primary">Attempt Again</a>
+                <a href="{{ url_for('user.subject_detail', subject_id=quiz.chapter.subject.id) }}" class="btn btn-outline-secondary">More Quizzes in {{ quiz.chapter.subject.name }}</a>
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
